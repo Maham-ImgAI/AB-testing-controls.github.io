@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experiment Runtime Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f4f0;
+    --bg3: #eeecea;
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #9c9a92;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --green-bg: #eaf3de;
+    --green-border: #639922;
+    --green-text: #27500a;
+    --amber-bg: #faeeda;
+    --amber-border: #ba7517;
+    --amber-text: #633806;
+    --red-bg: #fcebeb;
+    --red-border: #a32d2d;
+    --red-text: #501313;
+    --blue-text: #185fa5;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg2: #252523;
+      --bg3: #2e2e2b;
+      --text: #e8e6de;
+      --text2: #a8a69e;
+      --text3: #6e6c66;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.18);
+      --green-bg: #173404;
+      --green-border: #3b6d11;
+      --green-text: #c0dd97;
+      --amber-bg: #412402;
+      --amber-border: #854f0b;
+      --amber-text: #fac775;
+      --red-bg: #501313;
+      --red-border: #a32d2d;
+      --red-text: #f7c1c1;
+      --blue-text: #85b7eb;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+
+  .sec-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin: 20px 0 8px;
+    padding-bottom: 5px;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .chips { margin-bottom: 4px; }
+  .chip {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 99px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    margin: 0 3px 5px 0;
+    transition: all .12s;
+    font-family: inherit;
+  }
+  .chip:hover { background: var(--bg2); }
+  .chip.active {
+    background: var(--bg2);
+    color: var(--text);
+    font-weight: 500;
+    border-color: var(--text3);
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--text2);
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    margin-bottom: 16px;
+    line-height: 1.55;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 11px;
+    flex-wrap: wrap;
+  }
+  .lbl { font-size: 13px; color: var(--text2); min-width: 200px; flex-shrink: 0; }
+  .val { font-size: 13px; font-weight: 500; color: var(--text); min-width: 64px; text-align: right; }
+
+  input[type=range] {
+    flex: 1;
+    max-width: 180px;
+    accent-color: var(--text);
+    height: 4px;
+    cursor: pointer;
+  }
+
+  .mde-abs {
+    font-size: 11px;
+    color: var(--text3);
+    margin: -6px 0 10px 210px;
+  }
+
+  .mgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .mcard { background: var(--bg2); border-radius: var(--radius); padding: 10px 13px; }
+  .mc-l { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+  .mc-v { font-size: 20px; font-weight: 500; color: var(--text); line-height: 1.2; }
+  .mc-s { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .ci-section {
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .ci-sec-lbl { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+  .ci-wrap { position: relative; height: 24px; margin: 6px 0 18px; }
+  .ci-track { position: absolute; top: 9px; left: 0; right: 0; height: 6px; background: var(--bg3); border-radius: 3px; }
+  .ci-fill { position: absolute; top: 9px; height: 6px; border-radius: 3px; opacity: .55; }
+  .ci-zero { position: absolute; top: 2px; width: 2px; height: 20px; background: var(--text3); border-radius: 1px; }
+  .ci-dot { position: absolute; top: 6px; width: 12px; height: 12px; border-radius: 50%; margin-left: -6px; background: var(--blue-text); }
+  .ci-lo, .ci-hi { position: absolute; top: 20px; font-size: 11px; color: var(--text2); transform: translateX(-50%); white-space: nowrap; }
+  .ci-note { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  .verdict { border-radius: var(--radius-lg); padding: 13px 16px; margin-bottom: 16px; }
+  .v-go  { background: var(--green-bg); border: 0.5px solid var(--green-border); }
+  .v-warn{ background: var(--amber-bg); border: 0.5px solid var(--amber-border); }
+  .v-bad { background: var(--red-bg);   border: 0.5px solid var(--red-border);   }
+  .v-go  .v-title { color: var(--green-text); }
+  .v-warn .v-title { color: var(--amber-text); }
+  .v-bad  .v-title { color: var(--red-text); }
+  .v-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .v-body { font-size: 12px; color: var(--text2); line-height: 1.55; }
+  .v-body b { font-weight: 500; color: var(--text); }
+
+  .gr-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 12px;
+    color: var(--text);
+  }
+  .gr-row:last-child { border-bottom: none; }
+  .gr-wrap {
+    background: var(--bg);
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    padding: 2px 12px;
+  }
+
+  .footer {
+    margin-top: 32px;
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Experiment runtime calculator</h1>
+  <p class="subtitle">For new-user experiments. Fill in your app's numbers — DS handles the analysis.</p>
+
+  <div class="sec-label">What are you measuring?</div>
+  <div class="chips">
+    <button class="chip active" onclick="set('ad',this)">Ad rev / user</button>
+    <button class="chip" onclick="set('iap',this)">IAP rev / user</button>
+    <button class="chip" onclick="set('d1',this)">Retention D1</button>
+    <button class="chip" onclick="set('d7',this)">Retention D7</button>
+    <button class="chip" onclick="set('d30',this)">Retention D30</button>
+    <button class="chip" onclick="set('eng',this)">Engagement</button>
+  </div>
+  <div class="hint" id="hint"></div>
+
+  <div class="sec-label">Your app's numbers</div>
+
+  <div class="row">
+    <span class="lbl">Daily new installs</span>
+    <input type="range" id="sl-nu" min="100" max="50000" step="100" value="3000" oninput="calc()">
+    <span class="val" id="v-nu">3,000 / day</span>
+  </div>
+  <div class="row">
+    <span class="lbl" id="base-lbl">Baseline</span>
+    <input type="range" id="sl-base" min="1" max="80" step="1" value="30" oninput="calc()">
+    <span class="val" id="v-base">30%</span>
+  </div>
+  <div class="row">
+    <span class="lbl">Smallest lift worth detecting</span>
+    <input type="range" id="sl-mde" min="2" max="50" step="1" value="10" oninput="calc()">
+    <span class="val" id="v-mde">10% rel.</span>
+  </div>
+  <div class="mde-abs" id="mde-abs"></div>
+  <div class="row">
+    <span class="lbl">Traffic split to treatment</span>
+    <input type="range" id="sl-split" min="10" max="50" step="5" value="50" oninput="calc()">
+    <span class="val" id="v-split">50 / 50</span>
+  </div>
+
+  <div class="sec-label">Results</div>
+
+  <div class="mgrid">
+    <div class="mcard"><div class="mc-l">Per arm</div><div class="mc-v" id="r-n">—</div><div class="mc-s">new users needed</div></div>
+    <div class="mcard"><div class="mc-l">Recruit for</div><div class="mc-v" id="r-rec">—</div><div class="mc-s">days enrolling users</div></div>
+    <div class="mcard"><div class="mc-l">Total runtime</div><div class="mc-v" id="r-tot">—</div><div class="mc-s" id="r-tot-s">days</div></div>
+    <div class="mcard"><div class="mc-l">Earliest end</div><div class="mc-v" id="r-end">—</div><div class="mc-s">if started today</div></div>
+  </div>
+
+  <div class="ci-section">
+    <div class="ci-sec-lbl">95% confidence interval DS will report</div>
+    <div class="ci-wrap">
+      <div class="ci-track"></div>
+      <div class="ci-fill" id="ci-fill"></div>
+      <div class="ci-zero" id="ci-zero"></div>
+      <div class="ci-dot" id="ci-dot"></div>
+      <div class="ci-lo" id="ci-lo"></div>
+      <div class="ci-hi" id="ci-hi"></div>
+    </div>
+    <div class="ci-note" id="ci-note"></div>
+  </div>
+
+  <div id="verdict"></div>
+
+  <div class="sec-label">Guardrails DS will also watch</div>
+  <div class="gr-wrap" id="gr"></div>
+
+  <div class="footer">
+    80% power · α = 0.05 two-tailed · new users only<br>
+    Revenue variance is estimated — ask DS to calibrate with your actual data.
+  </div>
+
+</div>
+
+<script>
+function invNorm(p){const c=[-7.784894002430293e-3,-3.223964580411365e-1,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[7.784695709041462e-3,3.224671290700398e-1,2.445134137142996,3.754408661907416],pL=0.02425;let q,r;if(p<pL){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}if(p<=1-pL){q=p-.5;r=q*q;const a=[0,-3.969683028665376e1,2.209460984245205e2,-2.759285104469687e2,1.383577518672690e2,-3.066479806614716e1,2.506628277459239],b=[-5.447609879822406e1,1.615858368580409e2,-1.556989798598866e2,6.680131188771972e1,-1.328068155288572e1];return(((((a[1]*r+a[2])*r+a[3])*r+a[4])*r+a[5])*r+a[6])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+const ZA=invNorm(.975),ZB=invNorm(.8);
+
+const C={
+  ad:{lbl:'Avg ad revenue / new user ($)',unit:'$',isRate:false,def:.15,slMin:.01,slMax:2,slStep:.01,cv:4,obs:0,
+    hint:'Average ad revenue earned per new user in their first 7 days. A per-user dollar amount, not a rate. Ad revenue is noisy — DS will use CUPED variance reduction, which typically cuts runtime by 30–50%.',
+    gr:['Retention D7','Session count','Crash rate']},
+  iap:{lbl:'Avg IAP revenue / new user ($)',unit:'$',isRate:false,def:.05,slMin:.001,slMax:1,slStep:.001,cv:10,obs:0,
+    hint:'Average IAP revenue per new user in their first 7 days. Usually a small number — most users never purchase. Reflects conversion rate × average basket combined.',
+    gr:['Retention D7','Ad revenue','DAU']},
+  d1:{lbl:'Baseline D1 retention rate',unit:'%',isRate:true,def:40,slMin:5,slMax:80,slStep:1,cv:1,obs:1,
+    hint:'Percentage of new users who open the app again on day 1. Fastest retention metric to collect — observation window is just 1 day per user.',
+    gr:['Ad revenue','IAP']},
+  d7:{lbl:'Baseline D7 retention rate',unit:'%',isRate:true,def:20,slMin:3,slMax:60,slStep:1,cv:1,obs:7,
+    hint:'Percentage of new users who return on day 7. Total runtime = recruitment window + 7 days observation. Plan the calendar end date carefully.',
+    gr:['D1 retention','Ad revenue','Crash rate']},
+  d30:{lbl:'Baseline D30 retention rate',unit:'%',isRate:true,def:10,slMin:2,slMax:40,slStep:1,cv:1,obs:30,
+    hint:'Percentage of new users still active on day 30. Each user needs 30 days of observation after install. Only use as primary metric for changes that affect long-term habit.',
+    gr:['D7 retention','Ad revenue','IAP']},
+  eng:{lbl:'Baseline daily active rate — new users (%)',unit:'%',isRate:true,def:25,slMin:5,slMax:80,slStep:1,cv:1,obs:0,
+    hint:'Among newly installed users, the percentage active on any given day in their first 2 weeks. Run for at least 14 days to cover two full weekly cycles.',
+    gr:['Ad revenue','Retention D7','Crash rate']}
+};
+
+let cur='ad';
+
+function set(k,btn){
+  cur=k;document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const c=C[k];
+  document.getElementById('base-lbl').textContent=c.lbl;
+  document.getElementById('hint').textContent=c.hint;
+  const sl=document.getElementById('sl-base');
+  sl.min=c.slMin;sl.max=c.slMax;sl.step=c.slStep;sl.value=c.def;
+  calc();
+}
+
+function fmtDate(d){return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return d;}
+
+function calc(){
+  const c=C[cur];
+  const nu=parseFloat(document.getElementById('sl-nu').value);
+  const baseRaw=parseFloat(document.getElementById('sl-base').value);
+  const mdeRel=parseFloat(document.getElementById('sl-mde').value)/100;
+  const splitPct=parseFloat(document.getElementById('sl-split').value);
+  const split=splitPct/100;
+
+  document.getElementById('v-nu').textContent=Math.round(nu).toLocaleString()+' / day';
+  document.getElementById('v-base').textContent=c.isRate?baseRaw+'%':'$'+baseRaw.toFixed(3);
+  document.getElementById('v-mde').textContent=Math.round(mdeRel*100)+'% rel.';
+  document.getElementById('v-split').textContent=Math.round(splitPct)+' / '+(100-Math.round(splitPct));
+
+  const base=c.isRate?baseRaw/100:baseRaw;
+  const delta=base*mdeRel;
+  document.getElementById('mde-abs').textContent=c.isRate
+    ?'= '+(delta*100).toFixed(2)+' pp  ('+baseRaw+'% → '+(baseRaw*(1+mdeRel)).toFixed(1)+'%)'
+    :'= $'+(delta).toFixed(4)+'  ($'+base.toFixed(3)+' → $'+(base*(1+mdeRel)).toFixed(3)+')';
+
+  const variance=c.isRate?(base*(1-base)):Math.pow(base,2)*c.cv;
+  const n=Math.ceil(2*variance*Math.pow(ZA+ZB,2)/(delta*delta));
+  const nTot=Math.ceil(n/split);
+  const recDays=Math.max(Math.ceil(nTot/nu),14);
+  const totDays=recDays+c.obs;
+
+  document.getElementById('r-n').textContent=n.toLocaleString();
+  document.getElementById('r-rec').textContent=recDays;
+  document.getElementById('r-tot').textContent=totDays;
+  document.getElementById('r-tot-s').textContent=c.obs>0?recDays+'d + '+c.obs+'d observe':'days';
+  document.getElementById('r-end').textContent=fmtDate(addDays(totDays));
+
+  const se=Math.sqrt(2*variance/n);
+  const ciLo=delta-ZA*se,ciHi=delta+ZA*se;
+  const fmt=v=>c.isRate?(v*100).toFixed(2)+' pp':'$'+v.toFixed(4);
+  const allPos=ciLo>=0,allNeg=ciHi<=0;
+
+  const bMin=Math.min(ciLo,0)*1.5,bMax=Math.max(ciHi,delta)*1.5,rng=bMax-bMin;
+  const pct=v=>Math.max(1,Math.min(99,(v-bMin)/rng*100));
+  const fill=document.getElementById('ci-fill');
+  fill.style.left=pct(ciLo)+'%';fill.style.width=(pct(ciHi)-pct(ciLo))+'%';
+  fill.style.background=allPos?'#639922':allNeg?'#a32d2d':'#ba7517';
+  document.getElementById('ci-zero').style.left=pct(0)+'%';
+  document.getElementById('ci-dot').style.left=pct(delta)+'%';
+  const loEl=document.getElementById('ci-lo'),hiEl=document.getElementById('ci-hi');
+  loEl.style.left=pct(ciLo)+'%';loEl.textContent=fmt(ciLo);
+  hiEl.style.left=pct(ciHi)+'%';hiEl.textContent=fmt(ciHi);
+  document.getElementById('ci-note').textContent=allPos
+    ?'Both ends positive — a clean, actionable result.'
+    :allNeg?'Both ends negative — a clear harm signal.'
+    :'CI crosses zero — result may look inconclusive even if real. Widen split, raise MDE, or ask DS about CUPED.';
+
+  const diff=totDays<=21?'go':totDays<=42?'warn':'bad';
+  const V={
+    go:{cls:'v-go',title:'Feasible',
+      body:`<b>${totDays} days</b>, ending <b>${fmtDate(addDays(totDays))}</b>. Recruiting <b>${nTot.toLocaleString()}</b> new users (${n.toLocaleString()} per arm) from <b>${Math.round(nu).toLocaleString()}</b> daily installs.`},
+    warn:{cls:'v-warn',title:'Long — review inputs',
+      body:`<b>${totDays} days</b>. Try a 50/50 split or a larger MDE.${c.cv>1?' DS can apply CUPED which may cut this by ~30–50%.':''}`},
+    bad:{cls:'v-bad',title:'Too long — talk to DS first',
+      body:`<b>${totDays} days</b> isn't practical. MDE may be too small for your traffic, or the metric is very noisy. Ask DS before planning.`}
+  };
+  const v=V[diff];
+  document.getElementById('verdict').innerHTML=
+    `<div class="verdict ${v.cls}"><div class="v-title">${v.title}</div><div class="v-body">${v.body}</div></div>`;
+
+  document.getElementById('gr').innerHTML=C[cur].gr.map(g=>
+    `<div class="gr-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>${g}</div>`
+  ).join('');
+}
+
+set('ad',document.querySelector('.chip'));
+</script>
+</body>
+</html>
