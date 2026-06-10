@@ -222,14 +222,14 @@
     <button class="chip" onclick="set('d1',this)">Retention D1</button>
     <button class="chip" onclick="set('d7',this)">Retention D7</button>
     <button class="chip" onclick="set('d30',this)">Retention D30</button>
-    <button class="chip" onclick="set('eng',this)">Engagement</button>
+    <!--<button class="chip" onclick="set('eng',this)">Engagement</button>-->
   </div>
   <div class="hint" id="hint"></div>
 
   <div class="sec-label">Your app's numbers</div>
 
   <div class="row">
-    <span class="lbl">Daily new installs</span>
+    <span class="lbl">Daily new users</span>
     <input type="range" id="sl-nu" min="100" max="50000" step="100" value="3000" oninput="calc()">
     <span class="val" id="v-nu">3,000 / day</span>
   </div>
@@ -279,7 +279,7 @@
 
   <div class="footer">
     80% power · α = 0.05 two-tailed · new users only<br>
-    Revenue variance is estimated — ask DS to calibrate with your actual data.
+    Revenue variance is estimated for now — Needs to be calibrate with actual data [pending at my end].
   </div>
 
 </div>
