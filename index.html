@@ -290,10 +290,10 @@ const ZA=invNorm(.975),ZB=invNorm(.8);
 
 const C={
   ad:{lbl:'Avg ad revenue / new user ($)',unit:'$',isRate:false,def:.15,slMin:.01,slMax:2,slStep:.01,cv:4,obs:0,
-    hint:'Average ad revenue earned per new user in their first 7 days. A per-user dollar amount, not a rate. Ad revenue is noisy — DS will use CUPED variance reduction, which typically cuts runtime by 30–50%.',
+    hint:'Average ad revenue earned per new user in their first 7 days. Ad revenue is noisy — variance may need to be updated.',
     gr:['Retention D7','Session count','Crash rate']},
   iap:{lbl:'Avg IAP revenue / new user ($)',unit:'$',isRate:false,def:.05,slMin:.001,slMax:1,slStep:.001,cv:10,obs:0,
-    hint:'Average IAP revenue per new user in their first 7 days. Usually a small number — most users never purchase. Reflects conversion rate × average basket combined.',
+    hint:'Average IAP revenue per new user in their first 7 days. Usually a small number — most users never purchase.',
     gr:['Retention D7','Ad revenue','DAU']},
   d1:{lbl:'Baseline D1 retention rate',unit:'%',isRate:true,def:40,slMin:5,slMax:80,slStep:1,cv:1,obs:1,
     hint:'Percentage of new users who open the app again on day 1. Fastest retention metric to collect — observation window is just 1 day per user.',
