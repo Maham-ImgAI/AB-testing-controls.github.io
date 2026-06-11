@@ -348,6 +348,7 @@ function calc(){
   const nTot=Math.ceil(n/split);
   const recDays=Math.max(Math.ceil(nTot/nu),14);
   const totDays=recDays+c.obs;
+  const nControl=Math.ceil(n*(1-split)/split);
 
   document.getElementById('r-n').textContent=n.toLocaleString();
   document.getElementById('r-rec').textContent=recDays;
@@ -378,7 +379,8 @@ function calc(){
   const diff=totDays<=21?'go':totDays<=42?'warn':'bad';
   const V={
     go:{cls:'v-go',title:'Feasible',
-      body:`<b>${totDays} days</b>, ending <b>${fmtDate(addDays(totDays))}</b>. Recruiting <b>${nTot.toLocaleString()}</b> new users (${n.toLocaleString()} per arm) from <b>${Math.round(nu).toLocaleString()}</b> daily installs.`},
+      body:`<b>${totDays} days</b>, ending <b>${fmtDate(addDays(totDays))}</b>. Enrolling <b>${nTot.toLocaleString()}</b> new users in total — <b>${n.toLocaleString()}</b> to treatment and <b>${nControl.toLocaleString()}</b> to control — drawn from <b>${Math.round(nu).toLocaleString()}</b> new users/day (all installs via first_open).`},
+      //body:`<b>${totDays} days</b>, ending <b>${fmtDate(addDays(totDays))}</b>. Recruiting <b>${nTot.toLocaleString()}</b> new users (${n.toLocaleString()} per arm) from <b>${Math.round(nu).toLocaleString()}</b> daily installs.`},
     warn:{cls:'v-warn',title:'Long — review inputs',
       body:`<b>${totDays} days</b>. Try a 50/50 split or a larger MDE.${c.cv>1?' DS can apply CUPED which may cut this by ~30–50%.':''}`},
     bad:{cls:'v-bad',title:'Too long — talk to DS first',
